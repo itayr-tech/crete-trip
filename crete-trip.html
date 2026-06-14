@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crete — AMÉNTE Mindful Stay · Jun 17–22</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sand: #f5f0e8;
+    --sea: #1a6b8a;
+    --sea-light: #e8f4f8;
+    --sea-dark: #0d4a63;
+    --text: #1a1a1a;
+    --muted: #666;
+    --border: #e0dbd0;
+    --white: #fff;
+    --green: #2e7d32;
+    --green-light: #e8f5e9;
+    --amber: #9a6500;
+    --amber-light: #fff8e1;
+    --red: #b22222;
+    --red-light: #fdeaea;
+    --radius: 12px;
+    --radius-sm: 7px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--sand);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--sea-dark);
+    color: #fff;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  nav .logo { font-size: 15px; font-weight: 600; color: #fff; text-decoration: none; letter-spacing: 0.02em; }
+  nav .logo span { opacity: 0.55; font-weight: 400; }
+  nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; transition: color 0.15s; }
+  nav a:hover { color: #fff; }
+  nav .spacer { flex: 1; }
+  nav .dates { font-size: 12px; opacity: 0.55; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--sea-dark) 0%, var(--sea) 100%);
+    color: #fff;
+    padding: 3.5rem 2rem 3rem;
+    text-align: center;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+  .hero .sub { font-size: 1rem; opacity: 0.7; margin-bottom: 2rem; }
+  .hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+  .hero-stat { text-align: center; }
+  .hero-stat .val { font-size: 1.6rem; font-weight: 700; display: block; }
+  .hero-stat .lbl { font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--sea); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--sea-light);
+  }
+
+  /* MAP */
+  #map {
+    height: 420px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+    z-index: 1;
+  }
+  .map-legend {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem;
+    font-size: 12px; color: var(--muted); margin-bottom: 2rem;
+  }
+  .map-legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* DAY CARDS */
+  .day-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .day-header {
+    padding: 0.8rem 1.25rem;
+    background: #fafaf8;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .day-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 2px; }
+  .day-title { font-size: 15px; font-weight: 600; }
+  .day-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .badge-warn { background: var(--amber-light); color: var(--amber); }
+  .badge-alert { background: var(--red-light); color: var(--red); }
+  .badge-default { background: #f0f0f0; color: var(--muted); }
+
+  .event { display: flex; gap: 14px; padding: 0.75rem 1.25rem; border-bottom: 1px solid #f5f5f5; }
+  .event:last-child { border-bottom: none; }
+  .event-time { font-size: 12px; color: #bbb; min-width: 52px; padding-top: 2px; flex-shrink: 0; }
+  .event-icon { font-size: 18px; min-width: 22px; padding-top: 1px; flex-shrink: 0; }
+  .event-body h3 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .event-body p { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 5px; }
+  .tip {
+    font-size: 11px; padding: 2px 9px; border-radius: 20px; display: inline-block; margin-top: 2px;
+  }
+  .tip-info { background: var(--sea-light); color: var(--sea-dark); }
+  .tip-success { background: var(--green-light); color: var(--green); }
+  .tip-danger { background: var(--red-light); color: var(--red); }
+  .tip-warn { background: var(--amber-light); color: var(--amber); }
+
+  /* RESTAURANTS TABLE */
+  .restaurants-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--white); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .restaurants-table th { background: #f5f5f5; padding: 9px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+  .restaurants-table td { padding: 9px 14px; border-bottom: 1px solid #f5f5f5; vertical-align: top; color: var(--text); }
+  .restaurants-table tr:last-child td { border-bottom: none; }
+  .restaurants-table tr:nth-child(even) td { background: #fafaf8; }
+
+  /* LOGISTICS */
+  .logistics { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+  .logistics h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sea); margin-bottom: 0.75rem; }
+  .logistics ul { font-size: 13px; color: var(--muted); padding-left: 1.25rem; }
+  .logistics li { padding: 4px 0; line-height: 1.55; }
+  .logistics li strong { color: var(--text); }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: #bbb; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.4rem; }
+    .hero-stats { gap: 1.5rem; }
+    nav { padding: 0 1rem; gap: 1rem; }
+    .container { padding: 1.25rem 1rem 3rem; }
+    #map { height: 300px; }
+    .day-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">AMÉNTE Crete <span>· Trip Plan</span></a>
+  <div class="spacer"></div>
+  <a href="#itinerary">Itinerary</a>
+  <a href="#map-section">Map</a>
+  <a href="#eat">Eat</a>
+  <span class="dates">Jun 17–22, 2026</span>
+</nav>
+
+<div class="hero">
+  <h1>Crete — AMÉNTE Mindful Stay</h1>
+  <p class="sub">Plakias, South Coast · Self-drive · 4 nights</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="val">4</span><span class="lbl">Nights</span></div>
+    <div class="hero-stat"><span class="val">4</span><span class="lbl">Beaches</span></div>
+    <div class="hero-stat"><span class="val">2</span><span class="lbl">Gorge hikes</span></div>
+    <div class="hero-stat"><span class="val">4</span><span class="lbl">Restaurants</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- MAP -->
+  <div class="section-title" id="map-section">Map of all stops</div>
+  <div id="map"></div>
+  <div class="map-legend">
+    <span><span class="dot" style="background:#1a6b8a;"></span> Hotel</span>
+    <span><span class="dot" style="background:#2e7d32;"></span> Beach</span>
+    <span><span class="dot" style="background:#8b4513;"></span> Hike / gorge</span>
+    <span><span class="dot" style="background:#9a3c00;"></span> Restaurant / village</span>
+    <span><span class="dot" style="background:#7b3f9e;"></span> Day trip</span>
+  </div>
+
+  <!-- ITINERARY -->
+  <div class="section-title" id="itinerary">Itinerary</div>
+
+  <!-- DAY 1 -->
+  <div class="day-block">
+    <div class="day-header">
+      <div>
+        <div class="day-label">Wednesday · Jun 17</div>
+        <div class="day-title">Arrival &amp; first evening</div>
+      </div>
+      <span class="day-badge badge-default">~1h 50min drive from HER</span>
+    </div>
+    <div class="event">
+      <div class="event-time">4–5 pm</div>
+      <div class="event-icon">✈️</div>
+      <div class="event-body">
+        <h3>Land at Heraklion (HER)</h3>
+        <p>Pick up rental car. Head west on E75 toward Rethymno, then south through the mountains via Spili. Winding but well-paved and beautiful.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">~6:45 pm</div>
+      <div class="event-icon">🏨</div>
+      <div class="event-body">
+        <h3>Check in at AMÉNTE</h3>
+        <p>Drop bags, settle in. The property has Libyan Sea views — take 20 minutes just sitting with it before anything else.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">8:30 pm</div>
+      <div class="event-icon">🍽️</div>
+      <div class="event-body">
+        <h3>Dinner at Taverna Plateia, Mirthios village</h3>
+        <p>5 min drive up the mountain. Village square, panoramic bay view, honest Cretan food. Order saganaki, grilled fish.</p>
+        <span class="tip tip-success">No reservation needed · arrive by 8:30 for the golden light</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-block">
+    <div class="day-header">
+      <div>
+        <div class="day-label">Thursday · Jun 18</div>
+        <div class="day-title">Kourtaliotiko Gorge → Preveli Beach</div>
+      </div>
+      <span class="day-badge badge-warn">Big day — start early</span>
+    </div>
+    <div class="event">
+      <div class="event-time">7:30 am</div>
+      <div class="event-icon">☀️</div>
+      <div class="event-body">
+        <h3>Early breakfast &amp; pack</h3>
+        <p>Bring 2L water each, water shoes, a light layer for the gorge.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">8:00 am</div>
+      <div class="event-icon">🏔️</div>
+      <div class="event-body">
+        <h3>Kourtaliotiko Gorge hike</h3>
+        <p>Trailhead near Asomatos village (~20 min drive). 3–4 hrs through limestone walls, waterfalls, and cold river pools. Moderate difficulty — some scrambling and cold-water crossings. Water shoes essential.</p>
+        <span class="tip tip-info">8am start beats the tour buses by 2+ hours</span>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">~noon</div>
+      <div class="event-icon">🏖️</div>
+      <div class="event-body">
+        <h3>Preveli Beach &amp; lagoon swim</h3>
+        <p>Palm-fringed river lagoon meets the Libyan Sea between dramatic limestone cliffs. Swim in both the lagoon and the sea. Picnic or grab food from the beach kiosk.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">2:30 pm</div>
+      <div class="event-icon">⛪</div>
+      <div class="event-body">
+        <h3>Preveli Monastery (optional)</h3>
+        <p>17th-century monastery above the gorge, 15 min from the beach. Worth 30 minutes if you have energy left.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">8:00 pm</div>
+      <div class="event-icon">🍽️</div>
+      <div class="event-body">
+        <h3>Dinner at Vrisi Restaurant, Mirthios</h3>
+        <p>Best cooking in the area. Modern Cretan, local farmers, beautifully executed. Must-order: lamb in paprika sauce, shrimp orzo, zucchini flowers.</p>
+        <span class="tip tip-danger">Reserve in advance — fills up fast</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-block">
+    <div class="day-header">
+      <div>
+        <div class="day-label">Friday · Jun 19</div>
+        <div class="day-title">Skinaria snorkeling + Sfakia &amp; Loutro boat</div>
+      </div>
+      <span class="day-badge badge-default">Varied pace</span>
+    </div>
+    <div class="event">
+      <div class="event-time">9:00 am</div>
+      <div class="event-icon">🤿</div>
+      <div class="event-body">
+        <h3>Skinaria Beach — snorkeling</h3>
+        <p>8 km from AMÉNTE (~12 min). 30m+ water visibility, best snorkeling near Plakias. Very few crowds. Taverna for lunch.</p>
+        <span class="tip tip-info">Premium sunbeds ~€25 · worth it for shade</span>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">1:30 pm</div>
+      <div class="event-icon">🚗</div>
+      <div class="event-body">
+        <h3>Drive to Sfakia (~40 min west)</h3>
+        <p>Small fishing village on the Libyan Sea. Pick up the short ferry to Loutro — runs frequently in summer (~10 min crossing).</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">2:30 pm</div>
+      <div class="event-icon">⛵</div>
+      <div class="event-body">
+        <h3>Loutro — swim, wander, coffee</h3>
+        <p>One of the most peaceful spots in Crete. No roads, no cars, just whitewashed houses on the water. Swim off the rocks, sit at a waterfront cafe. Take the ferry back by 5pm.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">6:30 pm</div>
+      <div class="event-icon">🌅</div>
+      <div class="event-body">
+        <h3>Sunset at Souda Beach</h3>
+        <p>Sheltered horseshoe cove with the best golden-hour light in the area. 7 min from AMÉNTE.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">8:30 pm</div>
+      <div class="event-icon">🍽️</div>
+      <div class="event-body">
+        <h3>Dinner at Alatsi, Plakias</h3>
+        <p>Best cooking in Plakias village. Order: grilled octopus, chicken stuffed with Cretan graviera and apaki, seafood linguine.</p>
+        <span class="tip tip-danger">Reserve ahead · walkable from AMÉNTE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day-block">
+    <div class="day-header">
+      <div>
+        <div class="day-label">Saturday · Jun 20</div>
+        <div class="day-title">Frangokastello + coastal hike + last proper dinner</div>
+      </div>
+      <span class="day-badge badge-default">Relaxed pace</span>
+    </div>
+    <div class="event">
+      <div class="event-time">9:00 am</div>
+      <div class="event-icon">🏰</div>
+      <div class="event-body">
+        <h3>Drive to Frangokastello (~35 min west)</h3>
+        <p>14th-century Venetian castle on a beach. Adjacent beach (Orthi Ammos — sand dunes) is one of Crete's most beautiful and rarely crowded.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">11:30 am</div>
+      <div class="event-icon">🐟</div>
+      <div class="event-body">
+        <h3>Lunch in Sfakia village</h3>
+        <p>Small fishing village on the water. Pick any harbor fish taverna — all serve fresh catch. Lambs on the spit on weekends.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">3:00 pm</div>
+      <div class="event-icon">🥾</div>
+      <div class="event-body">
+        <h3>Coastal path: Plakias → Damnoni Beach</h3>
+        <p>1.5–2 hours, easy. Follows the coastline with Libyan Sea views the whole way. Swim at Damnoni before driving back.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">7:00 pm</div>
+      <div class="event-icon">🌄</div>
+      <div class="event-body">
+        <h3>Mirthios loop walk &amp; sunset</h3>
+        <p>Walk up to the hilltop village above Plakias (45 min, easy). Panoramic views of the entire bay. Watch the sunset from the ridge.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">8:30 pm</div>
+      <div class="event-icon">🍽️</div>
+      <div class="event-body">
+        <h3>Last dinner: Taverna Dionyssos, Mirthios</h3>
+        <p>Most traditional of the Mirthios restaurants. Family-run, pick-from-the-pot Cretan cooking. Order: goat with artichokes, snails, aubergine casserole.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day-block">
+    <div class="day-header">
+      <div>
+        <div class="day-label">Sunday · Jun 21</div>
+        <div class="day-title">Kotsifos Gorge + checkout + drive north</div>
+      </div>
+      <span class="day-badge badge-alert">Checkout by noon</span>
+    </div>
+    <div class="event">
+      <div class="event-time">7:00 am</div>
+      <div class="event-icon">🏔️</div>
+      <div class="event-body">
+        <h3>Kotsifos Gorge hike</h3>
+        <p>Trailhead in Kanevos village (~15 min from AMÉNTE). 2 hours, moderate. Gorge narrows to 10m with 600m vertical walls, a chapel carved into the rock face, and a 20m waterfall. Dry riverbed in June — easy walking. Back by 9:30am.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">9:30 am</div>
+      <div class="event-icon">🧳</div>
+      <div class="event-body">
+        <h3>Shower, pack, checkout</h3>
+        <p>Settle the bill. Slow final coffee before hitting the road.</p>
+      </div>
+    </div>
+    <div class="event">
+      <div class="event-time">11:30 am</div>
+      <div class="event-icon">🚗</div>
+      <div class="event-body">
+        <h3>Drive back to Heraklion airport (~1h 50min)</h3>
+        <p>Stop in Spili village (~30 min into the drive) — small mountain village with a famous lion-head fountain. Good for a last coffee and final view of the Cretan interior.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESTAURANTS -->
+  <div class="section-title" id="eat">Restaurants — reserve now</div>
+  <table class="restaurants-table">
+    <thead>
+      <tr><th>Restaurant</th><th>Location</th><th>When</th><th>Must-order</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Taverna Plateia</strong></td>
+        <td>Mirthios village</td>
+        <td>Wednesday dinner</td>
+        <td>Saganaki, grilled fish · No reservation needed</td>
+      </tr>
+      <tr>
+        <td><strong>Vrisi Restaurant</strong></td>
+        <td>Mirthios village</td>
+        <td>Thursday dinner</td>
+        <td>Lamb in paprika sauce, shrimp orzo, zucchini flowers · <strong>Reserve ASAP</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Alatsi</strong></td>
+        <td>Plakias (walkable)</td>
+        <td>Friday dinner</td>
+        <td>Grilled octopus, chicken with graviera &amp; apaki · <strong>Reserve ahead</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Taverna Dionyssos</strong></td>
+        <td>Mirthios village</td>
+        <td>Saturday dinner</td>
+        <td>Goat with artichokes, snails, aubergine casserole</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- LOGISTICS -->
+  <div class="section-title">Key logistics</div>
+  <div class="logistics">
+    <ul>
+      <li><strong>Vrisi &amp; Alatsi:</strong> reserve before you arrive — call or book online</li>
+      <li><strong>Preveli Beach:</strong> go before 10am or after 4pm to avoid tour groups</li>
+      <li><strong>Gorge gear:</strong> water shoes, 2L water each, light layer for shade</li>
+      <li><strong>Loutro ferry:</strong> departs from Sfakia harbour, runs every ~1–2 hrs in summer, ~€5 each way</li>
+      <li><strong>Spili stop:</strong> the mountain road through Spili is the best route both ways — worth a stop</li>
+      <li><strong>Car parking:</strong> easy everywhere except Rethymno old town center</li>
+      <li><strong>Skinaria snorkeling:</strong> bring your own mask if you have one</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  AMÉNTE Mindful Stay · Plakias, South Crete · June 2026
+</footer>
+
+<script>
+  const map = L.map('map', { zoomControl: true, scrollWheelZoom: false });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+    maxZoom: 17
+  }).addTo(map);
+
+  function makeIcon(color, label) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        background:${color};
+        width:30px;height:30px;border-radius:50%;
+        border:2.5px solid #fff;
+        box-shadow:0 2px 6px rgba(0,0,0,0.35);
+        display:flex;align-items:center;justify-content:center;
+        font-size:14px;line-height:1;
+      ">${label}</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -18]
+    });
+  }
+
+  const pois = [
+    { lat: 35.1920, lng: 24.3950, color: '#1a6b8a', icon: '🏨', name: 'AMÉNTE Mindful Stay', desc: 'Your base — adults-only boutique hotel with Libyan Sea views' },
+    { lat: 35.2060, lng: 24.3900, color: '#9a3c00', icon: '🍽️', name: 'Mirthios village', desc: 'Hilltop village above Plakias — Taverna Plateia, Vrisi & Dionyssos' },
+    { lat: 35.1830, lng: 24.3800, color: '#2e7d32', icon: '🏖️', name: 'Souda Beach', desc: 'Sheltered horseshoe cove · best sunset spot · 7 min from AMÉNTE' },
+    { lat: 35.1760, lng: 24.4200, color: '#2e7d32', icon: '🤿', name: 'Skinaria Beach', desc: 'Best snorkeling near Plakias · 30m+ visibility · very few crowds' },
+    { lat: 35.1880, lng: 24.4150, color: '#2e7d32', icon: '🏖️', name: 'Damnoni Beach', desc: 'Long sandy bay · end point of the coastal path hike from Plakias' },
+    { lat: 35.1530, lng: 24.5310, color: '#2e7d32', icon: '🌴', name: 'Preveli Beach', desc: 'Palm-fringed lagoon meets the Libyan Sea · one of Greece\'s most beautiful beaches' },
+    { lat: 35.1620, lng: 24.5220, color: '#8b4513', icon: '🏔️', name: 'Kourtaliotiko Gorge', desc: 'Thursday hike · 3–4 hrs · limestone walls, waterfalls, river pools → Preveli Beach' },
+    { lat: 35.1780, lng: 24.5350, color: '#8b4513', icon: '⛪', name: 'Preveli Monastery', desc: '17th-century monastery above the gorge · worth 30 min on the way back' },
+    { lat: 35.1900, lng: 24.3500, color: '#8b4513', icon: '🏔️', name: 'Kotsifos Gorge (Kanevos)', desc: 'Sunday hike · 2 hrs · 600m walls, carved rock chapel, 20m waterfall' },
+    { lat: 35.1960, lng: 24.0850, color: '#7b3f9e', icon: '🏰', name: 'Frangokastello', desc: '14th-century Venetian castle · Orthi Ammos beach (sand dunes) nearby' },
+    { lat: 35.2040, lng: 24.0550, color: '#7b3f9e', icon: '⛵', name: 'Sfakia (Chora Sfakion)', desc: 'Fishing village · ferry to Loutro departs here · Saturday lunch tavernas' },
+    { lat: 35.2100, lng: 24.0700, color: '#7b3f9e', icon: '🏡', name: 'Loutro', desc: 'Car-free white-washed village · only reachable by sea or foot · swim off the rocks' },
+    { lat: 35.2180, lng: 24.5080, color: '#9a3c00', icon: '🍽️', name: 'Alatsi Restaurant', desc: 'Best cooking in Plakias · grilled octopus, chicken with graviera & apaki · reserve ahead' },
+  ];
+
+  const markers = pois.map(p => {
+    const m = L.marker([p.lat, p.lng], { icon: makeIcon(p.color, p.icon) }).addTo(map);
+    m.bindPopup(`<strong style="font-size:13px;">${p.name}</strong><br><span style="font-size:12px;color:#666;">${p.desc}</span>`, { maxWidth: 220 });
+    return m;
+  });
+
+  const group = L.featureGroup(markers);
+  map.fitBounds(group.getBounds().pad(0.15));
+</script>
+
+</body>
+</html>
