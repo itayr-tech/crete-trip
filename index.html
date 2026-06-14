@@ -142,6 +142,30 @@
   .logistics li { padding: 4px 0; line-height: 1.55; }
   .logistics li strong { color: var(--text); }
 
+  /* WEATHER STRIP inside day cards */
+  .wx-strip {
+    background: var(--sea-light);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1.25rem;
+    display: none;
+    gap: 1.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .wx-strip.loaded { display: flex; }
+  .wx-main { display: flex; align-items: center; gap: 10px; }
+  .wx-icon { font-size: 22px; }
+  .wx-temps { font-size: 14px; font-weight: 600; color: var(--text); }
+  .wx-desc { font-size: 12px; color: var(--muted); }
+  .wx-meta { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .wx-pill { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .wx-uv-section { flex: 1; min-width: 200px; }
+  .wx-uv-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .wx-uv-bars { display: flex; gap: 3px; align-items: flex-end; height: 28px; }
+  .wx-uv-bar { flex: 1; border-radius: 2px 2px 0 0; min-height: 3px; position: relative; }
+  .wx-uv-bar span { position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--muted); white-space: nowrap; }
+  .wx-na { font-size: 12px; color: var(--muted); font-style: italic; padding: 0.5rem 0; }
+
   /* DAY SWITCHER */
   .day-switcher {
     display: flex; flex-wrap: wrap; gap: 8px;
@@ -222,7 +246,7 @@
   </div>
 
   <!-- DAY 1 -->
-  <div class="day-block" data-day="1">
+  <div class="day-block" data-day="1" data-wx="0">
     <div class="day-header">
       <div>
         <div class="day-label">Wednesday · Jun 17</div>
@@ -230,6 +254,7 @@
       </div>
       <span class="day-badge badge-default">~1h 50min drive from HER</span>
     </div>
+    <div class="wx-strip" id="wx-day-1"></div>
     <div class="event">
       <div class="event-time">4–5 pm</div>
       <div class="event-icon">✈️</div>
@@ -258,7 +283,7 @@
   </div>
 
   <!-- DAY 2 -->
-  <div class="day-block" data-day="2">
+  <div class="day-block" data-day="2" data-wx="1">
     <div class="day-header">
       <div>
         <div class="day-label">Thursday · Jun 18</div>
@@ -266,6 +291,7 @@
       </div>
       <span class="day-badge badge-warn">Big day — start early</span>
     </div>
+    <div class="wx-strip" id="wx-day-2"></div>
     <div class="event">
       <div class="event-time">7:30 am</div>
       <div class="event-icon">☀️</div>
@@ -311,7 +337,7 @@
   </div>
 
   <!-- DAY 3 -->
-  <div class="day-block" data-day="3">
+  <div class="day-block" data-day="3" data-wx="2">
     <div class="day-header">
       <div>
         <div class="day-label">Friday · Jun 19</div>
@@ -319,6 +345,7 @@
       </div>
       <span class="day-badge badge-default">Varied pace</span>
     </div>
+    <div class="wx-strip" id="wx-day-3"></div>
     <div class="event">
       <div class="event-time">9:00 am</div>
       <div class="event-icon">🤿</div>
@@ -364,7 +391,7 @@
   </div>
 
   <!-- DAY 4 -->
-  <div class="day-block" data-day="4">
+  <div class="day-block" data-day="4" data-wx="3">
     <div class="day-header">
       <div>
         <div class="day-label">Saturday · Jun 20</div>
@@ -372,6 +399,7 @@
       </div>
       <span class="day-badge badge-default">Relaxed pace</span>
     </div>
+    <div class="wx-strip" id="wx-day-4"></div>
     <div class="event">
       <div class="event-time">9:00 am</div>
       <div class="event-icon">🏰</div>
@@ -415,7 +443,7 @@
   </div>
 
   <!-- DAY 5 -->
-  <div class="day-block" data-day="5">
+  <div class="day-block" data-day="5" data-wx="4">
     <div class="day-header">
       <div>
         <div class="day-label">Sunday · Jun 21</div>
@@ -423,6 +451,7 @@
       </div>
       <span class="day-badge badge-alert">Checkout by noon</span>
     </div>
+    <div class="wx-strip" id="wx-day-5"></div>
     <div class="event">
       <div class="event-time">7:00 am</div>
       <div class="event-icon">🏔️</div>
@@ -644,53 +673,105 @@
     });
   });
 
-  // Weather — fetches live from wttr.in, shows Wed 17 → Sun 21
-  const weatherIcons = {
-    113: '☀️', 116: '⛅', 119: '☁️', 122: '☁️',
-    143: '🌫️', 176: '🌦️', 179: '🌨️', 182: '🌧️',
-    185: '🌧️', 200: '⛈️', 227: '🌨️', 230: '❄️',
-    248: '🌫️', 260: '🌫️', 263: '🌦️', 266: '🌧️',
-    281: '🌧️', 284: '🌧️', 293: '🌦️', 296: '🌧️',
-    299: '🌧️', 302: '🌧️', 305: '🌧️', 308: '🌧️',
-    311: '🌧️', 314: '🌧️', 317: '🌧️', 320: '🌨️',
-    323: '🌨️', 326: '🌨️', 329: '❄️', 332: '❄️',
-    335: '❄️', 338: '❄️', 350: '🌧️', 353: '🌦️',
-    356: '🌧️', 359: '🌧️', 362: '🌧️', 365: '🌧️',
-    368: '🌨️', 371: '❄️', 374: '🌧️', 377: '🌧️',
-    386: '⛈️', 389: '⛈️', 392: '⛈️', 395: '❄️'
+  // Weather — fetches live from wttr.in
+  const wxIcons = {
+    113:'☀️',116:'⛅',119:'☁️',122:'☁️',143:'🌫️',176:'🌦️',179:'🌨️',
+    182:'🌧️',185:'🌧️',200:'⛈️',227:'🌨️',230:'❄️',248:'🌫️',260:'🌫️',
+    263:'🌦️',266:'🌧️',281:'🌧️',284:'🌧️',293:'🌦️',296:'🌧️',299:'🌧️',
+    302:'🌧️',305:'🌧️',308:'🌧️',311:'🌧️',314:'🌧️',317:'🌧️',320:'🌨️',
+    323:'🌨️',326:'🌨️',329:'❄️',332:'❄️',335:'❄️',338:'❄️',350:'🌧️',
+    353:'🌦️',356:'🌧️',359:'🌧️',362:'🌧️',365:'🌧️',368:'🌨️',371:'❄️',
+    374:'🌧️',377:'🌧️',386:'⛈️',389:'⛈️',392:'⛈️',395:'❄️'
   };
+
+  function uvColor(uv) {
+    if (uv <= 2) return '#4caf50';
+    if (uv <= 5) return '#ffeb3b';
+    if (uv <= 7) return '#ff9800';
+    if (uv <= 10) return '#f44336';
+    return '#9c27b0';
+  }
+
+  function buildUvBars(hourly) {
+    // wttr.in hourly is at 0,300,600,900,1200,1500,1800,2100 (8 slots)
+    const slots = hourly.map(h => ({
+      time: String(h.time).padStart(4,'0').slice(0,2) + ':00',
+      uv: parseInt(h.uvIndex || 0)
+    }));
+    const maxUv = Math.max(...slots.map(s => s.uv), 1);
+    return `<div class="wx-uv-label">UV index by hour</div>
+      <div class="wx-uv-bars">
+        ${slots.map(s => `<div class="wx-uv-bar" style="height:${Math.max(3, Math.round(s.uv/maxUv*28))}px;background:${uvColor(s.uv)}" title="UV ${s.uv} at ${s.time}">
+          <span>${s.time.slice(0,2)}h</span>
+        </div>`).join('')}
+      </div>`;
+  }
+
+  function populateDayStrip(stripEl, d) {
+    const code = parseInt(d.hourly[4]?.weatherCode || d.hourly[0]?.weatherCode);
+    const desc = d.hourly[4]?.weatherDesc?.[0]?.value || '';
+    const maxRain = d.hourly.reduce((m, h) => Math.max(m, parseInt(h.chanceofrain||0)), 0);
+    const astro = d.astronomy?.[0] || {};
+    stripEl.innerHTML = `
+      <div class="wx-main">
+        <span class="wx-icon">${wxIcons[code]||'🌤️'}</span>
+        <div>
+          <div class="wx-temps">${d.maxtempC}° / ${d.mintempC}°C</div>
+          <div class="wx-desc">${desc}</div>
+        </div>
+      </div>
+      <div class="wx-meta">
+        <span class="wx-pill">💧 ${maxRain}% rain</span>
+        <span class="wx-pill">🕶️ UV ${d.uvIndex}</span>
+        ${astro.sunrise ? `<span class="wx-pill">🌅 ${astro.sunrise}</span>` : ''}
+        ${astro.sunset  ? `<span class="wx-pill">🌇 ${astro.sunset}</span>`  : ''}
+      </div>
+      <div class="wx-uv-section">${buildUvBars(d.hourly)}</div>`;
+    stripEl.classList.add('loaded');
+  }
 
   fetch('https://wttr.in/Plakias,Crete?format=j1')
     .then(r => r.json())
     .then(data => {
       const days = data.weather;
-      // trip days: Wed Jun17=days[0..], but we only get 3 days from API
-      // map however many we get, show N/A for the rest
-      const tripLabels = ['w0','w1','w2','w3','w4'];
-      tripLabels.forEach((id, i) => {
+      const gridIds = ['w0','w1','w2','w3','w4'];
+
+      // Populate the top forecast grid
+      gridIds.forEach((id, i) => {
         const d = days[i];
         if (!d) {
           document.getElementById(id+'-icon').textContent = '—';
           document.getElementById(id+'-desc').textContent = 'Not yet available';
-          document.getElementById(id+'-temp').textContent = '';
-          document.getElementById(id+'-rain').textContent = '';
           return;
         }
         const code = parseInt(d.hourly[4]?.weatherCode || d.hourly[0]?.weatherCode);
-        const desc = d.hourly[4]?.weatherDesc?.[0]?.value || '';
-        const maxC = d.maxtempC;
-        const minC = d.mintempC;
-        const rain = d.hourly.reduce((max, h) => Math.max(max, parseInt(h.chanceofrain||0)), 0);
-        document.getElementById(id+'-icon').textContent = weatherIcons[code] || '🌤️';
-        document.getElementById(id+'-desc').textContent = desc;
-        document.getElementById(id+'-temp').textContent = maxC + '° / ' + minC + '°';
-        document.getElementById(id+'-rain').textContent = rain > 5 ? '🌧 ' + rain + '% rain' : '💧 ' + rain + '% rain';
+        const maxRain = d.hourly.reduce((m, h) => Math.max(m, parseInt(h.chanceofrain||0)), 0);
+        document.getElementById(id+'-icon').textContent = wxIcons[code]||'🌤️';
+        document.getElementById(id+'-desc').textContent = d.hourly[4]?.weatherDesc?.[0]?.value || '';
+        document.getElementById(id+'-temp').textContent = d.maxtempC+'° / '+d.mintempC+'°';
+        document.getElementById(id+'-rain').textContent = '💧 '+maxRain+'% rain';
+      });
+
+      // Populate per-day strips
+      document.querySelectorAll('.day-block[data-wx]').forEach(block => {
+        const wxIdx = parseInt(block.dataset.wx);
+        const strip = block.querySelector('.wx-strip');
+        if (!strip) return;
+        const d = days[wxIdx];
+        if (!d) {
+          strip.innerHTML = '<span class="wx-na">Forecast not yet available for this date</span>';
+          strip.classList.add('loaded');
+          return;
+        }
+        populateDayStrip(strip, d);
       });
     })
     .catch(() => {
       ['w0','w1','w2','w3','w4'].forEach(id => {
-        document.getElementById(id+'-icon').textContent = '🌤️';
-        document.getElementById(id+'-desc').textContent = 'Forecast unavailable';
+        const el = document.getElementById(id+'-icon');
+        if (el) el.textContent = '🌤️';
+        const desc = document.getElementById(id+'-desc');
+        if (desc) desc.textContent = 'Unavailable';
       });
     });
 </script>
