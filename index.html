@@ -213,7 +213,7 @@
   <div class="section-title" id="itinerary">Itinerary</div>
 
   <div class="day-switcher">
-    <button class="day-btn" data-day="all">All days</button>
+    <button class="day-btn active" data-day="all">All days</button>
     <button class="day-btn" data-day="1">Wed · Arrival</button>
     <button class="day-btn" data-day="2">Thu · Preveli</button>
     <button class="day-btn" data-day="3">Fri · Loutro</button>
@@ -449,8 +449,48 @@
     </div>
   </div>
 
+  <!-- WEATHER -->
+  <div class="section-title">Weather forecast — Plakias</div>
+  <div id="weather-grid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:2rem;">
+    <div style="text-align:center;padding:1rem 0.5rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Wed 17</div>
+      <div id="w0-icon" style="font-size:26px;margin:4px 0;">⏳</div>
+      <div id="w0-desc" style="font-size:11px;color:var(--muted);margin-bottom:6px;min-height:30px;"></div>
+      <div id="w0-temp" style="font-size:15px;font-weight:600;"></div>
+      <div id="w0-rain" style="font-size:11px;color:var(--sea);margin-top:4px;"></div>
+    </div>
+    <div style="text-align:center;padding:1rem 0.5rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Thu 18</div>
+      <div id="w1-icon" style="font-size:26px;margin:4px 0;">⏳</div>
+      <div id="w1-desc" style="font-size:11px;color:var(--muted);margin-bottom:6px;min-height:30px;"></div>
+      <div id="w1-temp" style="font-size:15px;font-weight:600;"></div>
+      <div id="w1-rain" style="font-size:11px;color:var(--sea);margin-top:4px;"></div>
+    </div>
+    <div style="text-align:center;padding:1rem 0.5rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Fri 19</div>
+      <div id="w2-icon" style="font-size:26px;margin:4px 0;">⏳</div>
+      <div id="w2-desc" style="font-size:11px;color:var(--muted);margin-bottom:6px;min-height:30px;"></div>
+      <div id="w2-temp" style="font-size:15px;font-weight:600;"></div>
+      <div id="w2-rain" style="font-size:11px;color:var(--sea);margin-top:4px;"></div>
+    </div>
+    <div style="text-align:center;padding:1rem 0.5rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Sat 20</div>
+      <div id="w3-icon" style="font-size:26px;margin:4px 0;">⏳</div>
+      <div id="w3-desc" style="font-size:11px;color:var(--muted);margin-bottom:6px;min-height:30px;"></div>
+      <div id="w3-temp" style="font-size:15px;font-weight:600;"></div>
+      <div id="w3-rain" style="font-size:11px;color:var(--sea);margin-top:4px;"></div>
+    </div>
+    <div style="text-align:center;padding:1rem 0.5rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Sun 21</div>
+      <div id="w4-icon" style="font-size:26px;margin:4px 0;">⏳</div>
+      <div id="w4-desc" style="font-size:11px;color:var(--muted);margin-bottom:6px;min-height:30px;"></div>
+      <div id="w4-temp" style="font-size:15px;font-weight:600;"></div>
+      <div id="w4-rain" style="font-size:11px;color:var(--sea);margin-top:4px;"></div>
+    </div>
+  </div>
+
   <!-- RESTAURANTS -->
-  <div class="section-title" id="eat">Restaurants — reserve now</div>
+  <div class="section-title" id="eat">Restaurants</div>
   <table class="restaurants-table">
     <thead>
       <tr><th>Restaurant</th><th>Location</th><th>When</th><th>Must-order</th></tr>
@@ -466,7 +506,7 @@
         <td><strong>Vrisi Restaurant</strong></td>
         <td>Mirthios village</td>
         <td>Thursday dinner</td>
-        <td>Lamb in paprika sauce, shrimp orzo, zucchini flowers · <strong>Reserve ASAP</strong></td>
+        <td>Lamb in paprika sauce, shrimp orzo, zucchini flowers · ✅ Booked</td>
       </tr>
       <tr>
         <td><strong>Alatsi</strong></td>
@@ -484,16 +524,37 @@
   </table>
 
   <!-- LOGISTICS -->
-  <div class="section-title">Key logistics</div>
+  <div class="section-title">Before you go</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem;">
+    <div class="logistics">
+      <h3>📋 To do</h3>
+      <ul>
+        <li><strong>Book rental car</strong> at Heraklion airport</li>
+        <li><strong>Health / travel insurance</strong></li>
+        <li><strong>Alatsi:</strong> reserve for Friday dinner</li>
+        <li><strong>Preveli Beach:</strong> go before 10am or after 4pm</li>
+        <li><strong>Loutro ferry:</strong> departs Sfakia, every ~1–2 hrs, ~€5 each way</li>
+      </ul>
+    </div>
+    <div class="logistics">
+      <h3>🎒 Pack</h3>
+      <ul>
+        <li>Goggles (correction lenses)</li>
+        <li>Sunglasses</li>
+        <li>Dry bag</li>
+        <li>Driver's license</li>
+        <li>Water shoes (gorge crossings)</li>
+        <li>2L water bottles each</li>
+        <li>Light layer for gorge shade</li>
+      </ul>
+    </div>
+  </div>
   <div class="logistics">
+    <h3>🚗 On the road</h3>
     <ul>
-      <li><strong>Vrisi &amp; Alatsi:</strong> reserve before you arrive — call or book online</li>
-      <li><strong>Preveli Beach:</strong> go before 10am or after 4pm to avoid tour groups</li>
-      <li><strong>Gorge gear:</strong> water shoes, 2L water each, light layer for shade</li>
-      <li><strong>Loutro ferry:</strong> departs from Sfakia harbour, runs every ~1–2 hrs in summer, ~€5 each way</li>
-      <li><strong>Spili stop:</strong> the mountain road through Spili is the best route both ways — worth a stop</li>
-      <li><strong>Car parking:</strong> easy everywhere except Rethymno old town center</li>
-      <li><strong>Skinaria snorkeling:</strong> bring your own mask if you have one</li>
+      <li><strong>Route:</strong> Heraklion → E75 west → Rethymno → south via Spili (stop both ways)</li>
+      <li><strong>Car parking:</strong> easy everywhere outside Rethymno old town center</li>
+      <li><strong>Skinaria:</strong> bring your own mask if you have one</li>
     </ul>
   </div>
 
@@ -568,24 +629,70 @@
     }
   }
 
-  function setDay(day) {
-    document.querySelectorAll('.day-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.day === (day === 'all' ? 'all' : String(day)));
-    });
-    document.querySelectorAll('.day-block').forEach(block => {
-      block.style.display = (day === 'all' || block.dataset.day === String(day)) ? '' : 'none';
-    });
-    filterToDay(day);
-  }
-
   document.querySelectorAll('.day-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
       const day = btn.dataset.day === 'all' ? 'all' : parseInt(btn.dataset.day);
-      setDay(day);
+
+      document.querySelectorAll('.day-block').forEach(block => {
+        block.style.display = (day === 'all' || block.dataset.day === String(day)) ? '' : 'none';
+      });
+
+      filterToDay(day);
     });
   });
 
-  setDay('all');
+  // Weather — fetches live from wttr.in, shows Wed 17 → Sun 21
+  const weatherIcons = {
+    113: '☀️', 116: '⛅', 119: '☁️', 122: '☁️',
+    143: '🌫️', 176: '🌦️', 179: '🌨️', 182: '🌧️',
+    185: '🌧️', 200: '⛈️', 227: '🌨️', 230: '❄️',
+    248: '🌫️', 260: '🌫️', 263: '🌦️', 266: '🌧️',
+    281: '🌧️', 284: '🌧️', 293: '🌦️', 296: '🌧️',
+    299: '🌧️', 302: '🌧️', 305: '🌧️', 308: '🌧️',
+    311: '🌧️', 314: '🌧️', 317: '🌧️', 320: '🌨️',
+    323: '🌨️', 326: '🌨️', 329: '❄️', 332: '❄️',
+    335: '❄️', 338: '❄️', 350: '🌧️', 353: '🌦️',
+    356: '🌧️', 359: '🌧️', 362: '🌧️', 365: '🌧️',
+    368: '🌨️', 371: '❄️', 374: '🌧️', 377: '🌧️',
+    386: '⛈️', 389: '⛈️', 392: '⛈️', 395: '❄️'
+  };
+
+  fetch('https://wttr.in/Plakias,Crete?format=j1')
+    .then(r => r.json())
+    .then(data => {
+      const days = data.weather;
+      // trip days: Wed Jun17=days[0..], but we only get 3 days from API
+      // map however many we get, show N/A for the rest
+      const tripLabels = ['w0','w1','w2','w3','w4'];
+      tripLabels.forEach((id, i) => {
+        const d = days[i];
+        if (!d) {
+          document.getElementById(id+'-icon').textContent = '—';
+          document.getElementById(id+'-desc').textContent = 'Not yet available';
+          document.getElementById(id+'-temp').textContent = '';
+          document.getElementById(id+'-rain').textContent = '';
+          return;
+        }
+        const code = parseInt(d.hourly[4]?.weatherCode || d.hourly[0]?.weatherCode);
+        const desc = d.hourly[4]?.weatherDesc?.[0]?.value || '';
+        const maxC = d.maxtempC;
+        const minC = d.mintempC;
+        const rain = d.hourly.reduce((max, h) => Math.max(max, parseInt(h.chanceofrain||0)), 0);
+        document.getElementById(id+'-icon').textContent = weatherIcons[code] || '🌤️';
+        document.getElementById(id+'-desc').textContent = desc;
+        document.getElementById(id+'-temp').textContent = maxC + '° / ' + minC + '°';
+        document.getElementById(id+'-rain').textContent = rain > 5 ? '🌧 ' + rain + '% rain' : '💧 ' + rain + '% rain';
+      });
+    })
+    .catch(() => {
+      ['w0','w1','w2','w3','w4'].forEach(id => {
+        document.getElementById(id+'-icon').textContent = '🌤️';
+        document.getElementById(id+'-desc').textContent = 'Forecast unavailable';
+      });
+    });
 </script>
 
 </body>
